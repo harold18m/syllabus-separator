@@ -75,8 +75,9 @@ syllabus-separator/
 ├── syllabus_separator.py  # Script CLI (alternativo)
 ├── templates/
 │   └── index.html         # Interfaz web
-├── requirements.txt       # Dependencias (pip)
+├── requirements.txt       # Dependencias (pip/Render)
 ├── pyproject.toml         # Configuración del proyecto (uv)
+├── render.yaml            # Configuración de despliegue en Render
 └── README.md
 ```
 
@@ -100,45 +101,38 @@ uv run python syllabus_separator.py tu_archivo.pdf
 - **PDF Processing**: PyMuPDF (fitz)
 - **Frontend**: HTML5, CSS3, JavaScript vanilla
 
-## Despliegue en Vercel
+## Despliegue en Render
 
-Vercel detecta automáticamente tu app Flask si tienes `app.py` en la raíz. Para desplegar:
+Render es ideal para esta app porque mantiene el servidor activo (no serverless), lo que permite que las descargas funcionen correctamente.
 
 ### Opción 1: Desde la web (recomendado)
 
-1. Sube el proyecto a **GitHub**, **GitLab** o **Bitbucket**.
-2. Entra en [vercel.com](https://vercel.com) e inicia sesión.
-3. **Add New** → **Project** y conecta tu repositorio.
-4. Deja el **Framework Preset** en *Other* (o *Flask* si aparece).
-5. En **Root Directory** deja `.` si el código está en la raíz.
-6. En **Build and Output Settings** no hace falta cambiar nada; Vercel usará `app.py` como entrada.
-7. Haz clic en **Deploy**.
+1. Sube el proyecto a **GitHub** o **GitLab**.
+2. Entra en [render.com](https://render.com) y crea una cuenta (puedes usar GitHub).
+3. En el Dashboard: **New** → **Web Service**.
+4. Conecta tu repositorio.
+5. Render detectará Python automáticamente. Configura:
+   - **Name**: `syllabus-separator` (o el que prefieras)
+   - **Runtime**: Python 3
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn app:app`
+6. Selecciona el plan **Free** (la app se duerme tras 15 min de inactividad).
+7. Haz clic en **Create Web Service**.
 
-### Opción 2: Con Vercel CLI
+### Opción 2: Con Blueprint (render.yaml)
 
-```bash
-# Instalar Vercel CLI (una vez)
-npm i -g vercel
+El proyecto incluye `render.yaml` con la configuración lista. Solo conecta el repo y Render lo configurará automáticamente.
 
-# En la raíz del proyecto
-cd syllabus-separator
-vercel
-```
+### Variables de entorno (opcional)
 
-Sigue las preguntas (login si hace falta, nombre del proyecto, etc.). Para producción:
+Si necesitas configurar algo, puedes añadir variables en el panel de Render:
+- `PORT`: Render lo define automáticamente, gunicorn lo usa por defecto.
 
-```bash
-vercel --prod
-```
+### Notas sobre el plan gratuito
 
-### Requisitos en Vercel
-
-- El proyecto debe tener `requirements.txt` en la raíz (ya lo tienes).
-- Las plantillas deben estar en `templates/` (ya está correcto).
-
-### Limitación en serverless
-
-En Vercel la app corre como **función serverless**. Los PDFs procesados se guardan en memoria (`resultados_procesados`). Si la petición de descarga va a otra instancia, el enlace puede fallar. Para uso intensivo o muchos usuarios, convendría guardar los archivos en **Vercel Blob** (o similar) y generar enlaces temporales.
+- La app se **duerme** tras ~15 minutos de inactividad.
+- El primer request tras dormir tarda unos segundos (cold start).
+- Para evitar esto, puedes usar el plan **Starter** (~7 USD/mes) o un servicio de ping externo.
 
 ## Licencia
 

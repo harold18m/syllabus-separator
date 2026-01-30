@@ -15,6 +15,9 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB máximo
+# Desactivar debug en producción (Render define RENDER=true)
+if os.environ.get('RENDER'):
+    app.config['DEBUG'] = False
 
 # Carpeta temporal para archivos
 UPLOAD_FOLDER = 'temp_uploads'
@@ -249,4 +252,7 @@ def descargar_todo(resultado_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    # Nunca debug en producción (Render define RENDER=true)
+    debug = not os.environ.get('RENDER')
+    app.run(debug=debug, port=port)
