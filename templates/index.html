@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Separador de Sílabos - Tecsup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .upload-zone {
+            border: 3px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #f8fafc;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-zone.has-file {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-icon svg {
+            width: 32px;
+            height: 32px;
+            color: white;
+        }
+
+        .upload-zone h3 {
+            font-size: 1.1rem;
+            color: #334155;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-zone p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .file-name {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            background: #e0f2fe;
+            border-radius: 8px;
+            color: #0369a1;
+            font-weight: 500;
+            display: none;
+        }
+
+        .file-name.show {
+            display: block;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .results-header h2 {
+            color: #1e293b;
+            font-size: 1.25rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4f46e5;
+        }
+
+        .stat-card .label {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .curso-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .curso-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .curso-item:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .curso-info {
+            flex: 1;
+        }
+
+        .curso-info h4 {
+            color: #1e293b;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .curso-info span {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+
+        .btn-download {
+            padding: 0.5rem 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-download:hover {
+            background: #5a67d8;
+        }
+
+        .download-all {
+            margin-top: 1rem;
+        }
+
+        .error {
+            display: none;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-icon svg {
+            width: 32px;
+            height: 32px;
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .header {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+            }
+            
+            .curso-item {
+                flex-direction: column;
+                gap: 0.75rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>📚 Separador de Sílabos</h1>
+                <p>Procesa PDFs de Tecsup y separa cada curso automáticamente</p>
+            </div>
+            
+            <div class="content">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                    </div>
+                    <h3>Arrastra tu PDF aquí</h3>
+                    <p>o haz clic para seleccionar el archivo</p>
+                    <div class="file-name" id="fileName"></div>
+                </div>
+                
+                <input type="file" id="fileInput" accept=".pdf">
+                
+                <button class="btn btn-primary" id="processBtn" disabled>
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Procesar PDF
+                </button>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Procesando sílabos...</p>
+                </div>
+                
+                <div class="error" id="error"></div>
+                
+                <div class="results" id="results">
+                    <div class="results-header">
+                        <h2>✅ Cursos Procesados</h2>
+                    </div>
+                    
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="number" id="totalCursos">0</div>
+                            <div class="label">Cursos encontrados</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="number" id="totalPaginas">0</div>
+                            <div class="label">Páginas totales</div>
+                        </div>
+                    </div>
+                    
+                    <div class="curso-list" id="cursoList"></div>
+                    
+                    <button class="btn btn-success download-all" id="downloadAll">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Descargar Todo (ZIP)
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            Herramienta para convalidaciones UPC - Tecsup
+        </footer>
+    </div>
+
+    <script>
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const processBtn = document.getElementById('processBtn');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const results = document.getElementById('results');
+        const cursoList = document.getElementById('cursoList');
+        const downloadAll = document.getElementById('downloadAll');
+        
+        let selectedFile = null;
+        let resultadoId = null;
+
+        // Drag and drop
+        uploadZone.addEventListener('click', () => fileInput.click());
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                handleFile(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            selectedFile = file;
+            fileName.textContent = `📄 ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            fileName.classList.add('show');
+            uploadZone.classList.add('has-file');
+            processBtn.disabled = false;
+            error.classList.remove('show');
+            results.classList.remove('show');
+        }
+        
+        processBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            loading.classList.add('show');
+            error.classList.remove('show');
+            results.classList.remove('show');
+            processBtn.disabled = true;
+            
+            const formData = new FormData();
+            formData.append('pdf', selectedFile);
+            
+            try {
+                const response = await fetch('/procesar', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Error al procesar');
+                }
+                
+                resultadoId = data.resultado_id;
+                
+                // Mostrar estadísticas
+                document.getElementById('totalCursos').textContent = data.cursos.length;
+                document.getElementById('totalPaginas').textContent = data.total_paginas;
+                
+                // Generar lista de cursos
+                cursoList.innerHTML = data.cursos.map((curso, index) => `
+                    <div class="curso-item">
+                        <div class="curso-info">
+                            <h4>${index + 1}. ${curso.nombre}</h4>
+                            <span>Páginas ${curso.rango} (${curso.paginas} páginas)</span>
+                        </div>
+                        <button class="btn-download" onclick="descargarCurso('${curso.archivo}')">
+                            Descargar
+                        </button>
+                    </div>
+                `).join('');
+                
+                results.classList.add('show');
+                
+            } catch (err) {
+                error.textContent = `❌ ${err.message}`;
+                error.classList.add('show');
+            } finally {
+                loading.classList.remove('show');
+                processBtn.disabled = false;
+            }
+        });
+        
+        function descargarCurso(nombreArchivo) {
+            if (resultadoId) {
+                window.location.href = `/descargar/${resultadoId}/${encodeURIComponent(nombreArchivo)}`;
+            }
+        }
+        
+        downloadAll.addEventListener('click', () => {
+            if (resultadoId) {
+                window.location.href = `/descargar-todo/${resultadoId}`;
+            }
+        });
+    </script>
+</body>
+</html>
