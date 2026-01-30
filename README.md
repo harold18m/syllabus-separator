@@ -100,6 +100,46 @@ uv run python syllabus_separator.py tu_archivo.pdf
 - **PDF Processing**: PyMuPDF (fitz)
 - **Frontend**: HTML5, CSS3, JavaScript vanilla
 
+## Despliegue en Vercel
+
+Vercel detecta automáticamente tu app Flask si tienes `app.py` en la raíz. Para desplegar:
+
+### Opción 1: Desde la web (recomendado)
+
+1. Sube el proyecto a **GitHub**, **GitLab** o **Bitbucket**.
+2. Entra en [vercel.com](https://vercel.com) e inicia sesión.
+3. **Add New** → **Project** y conecta tu repositorio.
+4. Deja el **Framework Preset** en *Other* (o *Flask* si aparece).
+5. En **Root Directory** deja `.` si el código está en la raíz.
+6. En **Build and Output Settings** no hace falta cambiar nada; Vercel usará `app.py` como entrada.
+7. Haz clic en **Deploy**.
+
+### Opción 2: Con Vercel CLI
+
+```bash
+# Instalar Vercel CLI (una vez)
+npm i -g vercel
+
+# En la raíz del proyecto
+cd syllabus-separator
+vercel
+```
+
+Sigue las preguntas (login si hace falta, nombre del proyecto, etc.). Para producción:
+
+```bash
+vercel --prod
+```
+
+### Requisitos en Vercel
+
+- El proyecto debe tener `requirements.txt` en la raíz (ya lo tienes).
+- Las plantillas deben estar en `templates/` (ya está correcto).
+
+### Limitación en serverless
+
+En Vercel la app corre como **función serverless**. Los PDFs procesados se guardan en memoria (`resultados_procesados`). Si la petición de descarga va a otra instancia, el enlace puede fallar. Para uso intensivo o muchos usuarios, convendría guardar los archivos en **Vercel Blob** (o similar) y generar enlaces temporales.
+
 ## Licencia
 
 MIT License
